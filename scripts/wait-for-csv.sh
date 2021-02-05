@@ -3,12 +3,12 @@
 NAMESPACE="$1"
 NAME="$2"
 
-retries=10
+retries=20
 while [[ $(kubectl get csv -n "${NAMESPACE}" -o jsonpath='{range .items[*]}{.metadata.name}{"\n"}{end}' | grep -c "${NAME}") -eq 0 ]] && \
  [[ "${retries}" -gt 0 ]]; do
   echo "Waiting for ${NAME} csv to be created"
   retries=$(( retries - 1))
-  sleep 30
+  sleep 60
 done
 
 if [[ $(kubectl get csv -n "${NAMESPACE}" -o jsonpath='{range .items[*]}{.metadata.name}{"\n"}{end}' | grep -c "${NAME}") -eq 0 ]]; then
