@@ -1,11 +1,72 @@
 id: github.com/ibm-garage-cloud/terraform-ibm-cp-platform-navigator
-name: ""
+name: ibm-cp-platform-navigator
 type: terraform
-description: ""
+description: Module to install the Cloud Pak Platform Navigator
 tags:
   - tools
   - devops
 versions:
+  - platforms:
+      - ocp4
+    dependencies:
+      - id: cluster
+        refs:
+          - source: github.com/ibm-garage-cloud/terraform-ibm-container-platform
+            version: ">= 1.7.0"
+          - source: github.com/ibm-garage-cloud/terraform-k8s-ocp-cluster
+            version: ">= 2.0.0"
+      - id: namespace
+        refs:
+          - source: github.com/ibm-garage-cloud/terraform-k8s-namespace
+            version: ">= 2.1.0"
+      - id: cp-catalog
+        refs:
+          - source: github.com/ibm-garage-cloud/terraform-ibm-cp-catalog
+            version: ">= 1.0.0"
+    variables:
+      - name: cluster_type
+        moduleRef:
+          id: cluster
+          output: type_code
+        type: string
+        description: The type of cluster
+        default: ocp4
+        optional: true
+      - name: cluster_config_file
+        moduleRef:
+          id: cluster
+          output: config_file_path
+        type: string
+        description: The location of the kube config
+      - name: namespace
+        moduleRef:
+          id: namespace
+          output: name
+          discriminator: cloud-pak
+        type: string
+        description: The namespace where the platform navigator should be installed
+        default: cp4i
+        optional: true
+      - name: catalog_name
+        moduleRef:
+          id: cp-catalog
+          output: name
+        type: string
+        description: The name of the Cloud Pak catalog
+        default: ibm-operator-catalog
+        optional: true
+      - name: gitops_dir
+        scope: global
+        type: string
+        description: The directory where the gitops configuration should be stored
+        default: ""
+        optional: true
+    version: v1.0.0
+    outputs:
+      - name: name
+        description: Platform navigator instance name
+      - name: namespace
+        description: Platform navigator instance namespace
   - platforms:
       - kubernetes
       - ocp3
@@ -27,28 +88,3 @@ versions:
     #          version: ">= 1.6.0"
     variables: []
     version: v0.0.0
-#    - name: cluster_type
-#      moduleRef:
-#        id: cluster
-#        output: type_code
-#    - name: cluster_ingress_hostname
-#      moduleRef:
-#        id: cluster
-#        output: ingress_hostname
-#    - name: cluster_config_file
-#      moduleRef:
-#        id: cluster
-#        output: config_file_path
-#    - name: tls_secret_name
-#      moduleRef:
-#        id: cluster
-#        output: tls_secret_name
-#    - name: releases_namespace
-#      moduleRef:
-#        id: namespace
-#        output: name
-#        discriminator: tools
-#    - name: icon_url
-#      moduleRef:
-#        id: dashboard
-#        output: base_icon_url
