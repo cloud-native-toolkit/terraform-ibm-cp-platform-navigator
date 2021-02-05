@@ -82,7 +82,7 @@ resource "null_resource" "create_instance" {
   depends_on = [null_resource.create_subscription, local_file.instance_yaml]
 
   provisioner "local-exec" {
-    command = "kubectl apply -n ${var.namespace} -f ${local.instance_file} && ${path.module}/scripts/wait-for-deployment.sh ${var.namespace} integration-navigator"
+    command = "kubectl apply -n ${var.namespace} -f ${local.instance_file}"
 
     environment = {
       KUBECONFIG = var.cluster_config_file
