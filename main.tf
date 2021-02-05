@@ -58,7 +58,7 @@ resource "null_resource" "create_subscription" {
   depends_on = [local_file.subscription_yaml]
 
   provisioner "local-exec" {
-    command = "kubectl apply -n ${var.namespace} -f ${local.subscription_file} && ${path.module}/scripts/wait-for-csv.sh ${var.namespace} ibm-integration-platform-navigator"
+    command = "kubectl apply -f ${local.subscription_file} && ${path.module}/scripts/wait-for-csv.sh ${var.namespace} ibm-integration-platform-navigator"
 
     environment = {
       KUBECONFIG = var.cluster_config_file
