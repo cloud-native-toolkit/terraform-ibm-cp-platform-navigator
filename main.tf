@@ -61,11 +61,26 @@ resource "null_resource" "create_subscription" {
     command = "cat ${local.subscription_file}"
   }
 
+  triggers = {
+    KUBECONFIG = var.cluster_config_file
+    file = local.subscription_file
+    namespace = var.namespace
+  }
+
   provisioner "local-exec" {
-    command = "kubectl apply -f ${local.subscription_file} && ${path.module}/scripts/wait-for-csv.sh ${var.namespace} ibm-integration-platform-navigator"
+    command = "kubectl apply -f ${self.triggers.file} && ${path.module}/scripts/wait-for-csv.sh ${self.triggers.namespace} ibm-integration-platform-navigator"
 
     environment = {
-      KUBECONFIG = var.cluster_config_file
+      KUBECONFIG = self.triggers.KUBECONFIG
+    }
+  }
+
+  provisioner "local-exec" {
+    when = destroy
+    command = "kubectl delete -f ${self.triggers.file}"
+
+    environment = {
+      KUBECONFIG = self.triggers.KUBECONFIG
     }
   }
 }
@@ -81,11 +96,26 @@ resource local_file instance_yaml {
 resource "null_resource" "create_instance" {
   depends_on = [null_resource.create_subscription, local_file.instance_yaml]
 
+  triggers = {
+    KUBECONFIG = var.cluster_config_file
+    namespace = var.namespace
+    file = local.instance_file
+  }
+
   provisioner "local-exec" {
-    command = "kubectl apply -n ${var.namespace} -f ${local.instance_file}"
+    command = "kubectl apply -n ${self.triggers.namespace} -f ${self.triggers.file}"
 
     environment = {
-      KUBECONFIG = var.cluster_config_file
+      KUBECONFIG = self.triggers.KUBECONFIG
+    }
+  }
+
+  provisioner "local-exec" {
+    when = destroy
+    command = "kubectl delete -n ${self.triggers.namespace} -f ${self.triggers.file}"
+
+    environment = {
+      KUBECONFIG = self.triggers.KUBECONFIG
     }
   }
 }
