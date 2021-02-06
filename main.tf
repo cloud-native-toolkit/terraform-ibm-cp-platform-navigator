@@ -1,6 +1,7 @@
 locals {
   tmp_dir           = "${path.cwd}/.tmp"
-  gitops_dir        = var.gitops_dir != "" ? "${var.gitops_dir}/platform-navigator" : "${path.cwd}/gitops/platform-navigator"
+  gitops_global     = var.gitops_dir != "" ? var.gitops_dir : "${path.cwd}/gitops"
+  gitops_dir        = "${local.gitops_global}/platform-navigator"
   subscription_file = "${local.gitops_dir}/subscription.yaml"
   subscription_name = "ibm-integration-platform-navigator"
   subscription_namespace = "openshift-operators"
