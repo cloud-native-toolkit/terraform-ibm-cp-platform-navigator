@@ -1,15 +1,18 @@
 locals {
   tmp_dir           = "${path.cwd}/.tmp"
-  gitops_dir        = var.gitops_dir != "" ? "${var.gitops_dir}/platform-navigator" : "${path.cwd}/gitops/app-connect"
+  gitops_dir        = var.gitops_dir != "" ? "${var.gitops_dir}/platform-navigator" : "${path.cwd}/gitops/platform-navigator"
   subscription_file = "${local.gitops_dir}/subscription.yaml"
+  subscription_name = "ibm-integration-platform-navigator"
+  subscription_namespace = "openshift-operators"
+
   instance_file     = "${local.gitops_dir}/instance.yaml"
   instance_name     = "integration-navigator"
   subscription      = {
     apiVersion = "operators.coreos.com/v1alpha1"
     kind = "Subscription"
     metadata = {
-      name = "ibm-integration-platform-navigator"
-      namespace = "openshift-operators"
+      name = local.subscription_name
+      namespace = local.subscription_namespace
     }
     spec = {
       channel = "v4.0"
@@ -58,13 +61,14 @@ resource "null_resource" "create_subscription" {
   depends_on = [local_file.subscription_yaml]
 
   provisioner "local-exec" {
-    command = "cat ${local.subscription_file}"
+    command = "cat ${local_file.subscription_yaml.filename}"
   }
 
   triggers = {
     KUBECONFIG = var.cluster_config_file
-    file = local.subscription_file
-    namespace = var.namespace
+    namespace = local.subscription_namespace
+    name = local.subscription_name
+    file = local_file.subscription_yaml.filename
   }
 
   provisioner "local-exec" {
@@ -77,7 +81,7 @@ resource "null_resource" "create_subscription" {
 
   provisioner "local-exec" {
     when = destroy
-    command = "kubectl delete -f ${self.triggers.file}"
+    command = "kubectl delete -n ${self.triggers.namespace} subscription ${self.triggers.name}"
 
     environment = {
       KUBECONFIG = self.triggers.KUBECONFIG
@@ -99,7 +103,7 @@ resource "null_resource" "create_instance" {
   triggers = {
     KUBECONFIG = var.cluster_config_file
     namespace = var.namespace
-    file = local.instance_file
+    file = local_file.instance_yaml.filename
   }
 
   provisioner "local-exec" {
