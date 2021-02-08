@@ -4,6 +4,7 @@ description: Module to install the Cloud Pak Platform Navigator
 tags:
     - tools
     - devops
+provider: k8s
 versions:
 - platforms:
     - ocp4
