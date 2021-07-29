@@ -16,7 +16,7 @@ locals {
       namespace = local.subscription_namespace
     }
     spec = {
-      channel = "v4.0"
+      channel = var.channel
       installPlanApproval = "Automatic"
       name = "ibm-integration-platform-navigator"
       source = var.catalog_name

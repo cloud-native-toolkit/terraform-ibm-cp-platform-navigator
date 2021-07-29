@@ -26,3 +26,9 @@ variable "gitops_dir" {
   description = "The directory where the gitops configuration should be stored"
   default     = ""
 }
+
+variable "channel" {
+  type        = string
+  description = "The channel from which the Platform Navigator should be installed"
+  default     = "v5.0"
+}
